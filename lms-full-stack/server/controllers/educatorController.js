@@ -6,34 +6,29 @@ import { clerkClient } from '@clerk/express'
 
 // update role to educator
 export const updateRoleToEducator = async (req, res) => {
-
     try {
+        const userId = req.auth.userId;
 
-        const userId = req.auth.userId
-
-        await clerkClient.users.updateUserMetadata(userId, {
+        // Use updateUser instead of updateUserMetadata
+        await clerkClient.users.updateUser(userId, {
             publicMetadata: {
                 role: 'educator',
             },
-        })
+        });
 
-        res.json({ success: true, message: 'You can publish a course now' })
+        res.json({ success: true, message: 'You can publish a course now' });
 
     } catch (error) {
-        res.json({ success: false, message: error.message })
+        console.error("Clerk Error:", error); // Log error for debugging
+        res.json({ success: false, message: error.message });
     }
-
 }
 
 // Add New Course
 export const addCourse = async (req, res) => {
-
     try {
-
         const { courseData } = req.body
-
         const imageFile = req.file
-
         const educatorId = req.auth.userId
 
         if (!imageFile) {
@@ -41,23 +36,21 @@ export const addCourse = async (req, res) => {
         }
 
         const parsedCourseData = await JSON.parse(courseData)
-
         parsedCourseData.educator = educatorId
 
-        const newCourse = await Course.create(parsedCourseData)
-
+        // 1. Upload to Cloudinary FIRST
         const imageUpload = await cloudinary.uploader.upload(imageFile.path)
 
-        newCourse.courseThumbnail = imageUpload.secure_url
+        // 2. Add the URL to the data
+        parsedCourseData.courseThumbnail = imageUpload.secure_url
 
-        await newCourse.save()
+        // 3. ONLY THEN create the course in the database
+        const newCourse = await Course.create(parsedCourseData)
 
         res.json({ success: true, message: 'Course Added' })
 
     } catch (error) {
-
         res.json({ success: false, message: error.message })
-
     }
 }
 

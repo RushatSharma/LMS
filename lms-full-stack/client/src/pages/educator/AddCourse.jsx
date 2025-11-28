@@ -92,11 +92,11 @@ const AddCourse = () => {
 
   const handleSubmit = async (e) => {
     try {
-
       e.preventDefault();
 
       if (!image) {
         toast.error('Thumbnail Not Selected')
+        return; // <--- ADD THIS LINE (This stops the function)
       }
 
       const courseData = {
