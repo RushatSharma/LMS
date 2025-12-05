@@ -4,7 +4,8 @@ import { toast } from 'react-toastify';
 import Quill from 'quill';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
-import { useSearchParams } from 'react-router-dom'; // Import this
+import { useSearchParams } from 'react-router-dom';
+import uniqid from 'uniqid';
 
 const AddCourse = () => {
 
@@ -63,7 +64,7 @@ const AddCourse = () => {
       const title = prompt('Enter Chapter Name:');
       if (title) {
         const newChapter = {
-          chapterId: crypto.randomUUID(),
+          chapterId: uniqid(),
           chapterTitle: title,
           chapterContent: [],
           collapsed: false,
@@ -105,7 +106,7 @@ const AddCourse = () => {
           const newLecture = {
             ...lectureDetails,
             lectureOrder: chapter.chapterContent.length > 0 ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1 : 1,
-            lectureId: crypto.randomUUID()
+            lectureId: uniqid()
           };
           chapter.chapterContent.push(newLecture);
         }
